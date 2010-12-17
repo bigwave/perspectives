@@ -118,9 +118,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FavoritePerspectives.cs" />
-    <Compile Include="PerspectiveName.xaml.cs">
-      <DependentUpon>PerspectiveName.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Perspectives.xaml.cs">
       <DependentUpon>Perspectives.xaml</DependentUpon>
     </Compile>
@@ -146,6 +143,7 @@
     <EmbeddedResource Include="VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <ManifestResourceName>VSPackage</ManifestResourceName>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -163,23 +161,19 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Images_32bit.bmp" />
-    <None Include="Resources\Images_24bit.bmp" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="Resources\301.bmp" />
     <Resource Include="Resources\Images.bmp" />
     <Resource Include="current.ico" />
+    <Content Include="image1.PNG">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="perspectives_logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PerspectiveName.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Perspectives.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

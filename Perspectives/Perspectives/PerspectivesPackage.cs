@@ -34,7 +34,7 @@ namespace AdamDriscoll.Perspectives
     // This attribute registers a tool window exposed by this package.
     [ProvideToolWindow(typeof(PerspectivesToolWindow))]
     [Guid(GuidList.guidPerspectivesPkgString)]
-    //[ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
+    [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
     public sealed class PerspectivesPackage : Package
     {
         /// <summary>
@@ -67,7 +67,7 @@ namespace AdamDriscoll.Perspectives
 
             var dte = (DTE) GetService(typeof (DTE));
             (window as PerspectivesToolWindow).SetDte(dte);
-            (window as PerspectivesToolWindow).SetPerspectives(new Perspective(dte).GetPerspectives());
+            (window as PerspectivesToolWindow).SetPerspectives(new Perspective(dte).GetPerspectives(true));
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
@@ -93,7 +93,11 @@ namespace AdamDriscoll.Perspectives
             {
                 // Create the command for the menu item.
                 CommandID saveCommandId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSave);
-                MenuCommand saveMenuItem = new MenuCommand(SaveCurrent, saveCommandId);
+
+                OleMenuCommand saveMenuItem = new OleMenuCommand(SaveCurrent, saveCommandId);
+
+                saveMenuItem.BeforeQueryStatus += InitMruMenu;
+
                 mcs.AddCommand(saveMenuItem);
 
                 CommandID menuCommandID = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSaveAs);
@@ -104,42 +108,51 @@ namespace AdamDriscoll.Perspectives
                 CommandID toolwndCommandID = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidViewManager);
                 MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
-
-                InitMRUMenu(mcs);
             }
         }
 
-        private void InitMRUMenu(OleMenuCommandService mcs)
+        private int _lastInt = 1;
+
+        private void InitMruMenu(object sender, EventArgs e)
         {
            var dte = (DTE)GetService(typeof(DTE));
             var per = new Perspective(dte);
 
+            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+
+            for (int x = _lastInt - 1; x >= 0; x--)
+            {
+                var cmdId = new CommandID(
+                    GuidList.guidPerspectivesCmdSet, 0x0109 + x);
+
+                var mc = mcs.FindCommand(cmdId) as OleMenuCommand;
+                if (mc != null)
+                {
+                    mcs.RemoveCommand(mc);
+                }
+            }
+
             int i = 0;
-            foreach(var perspective in per.GetPerspectives())
+            foreach(var perspective in per.GetPerspectives(true))
             {
                 var cmdID = new CommandID(
                     GuidList.guidPerspectivesCmdSet, 0x0109 + i);
-                var mc = new OleMenuCommand(Apply, cmdID);
-                mc.BeforeQueryStatus += new EventHandler(mc_BeforeQueryStatus);
-                mcs.AddCommand(mc);
+                
+                var mc = mcs.FindCommand(cmdID) as OleMenuCommand;
+                if (mc != null)
+                {
+                    mc.Text = perspective.Name;
+                }
+                else
+                {
+                    mc = new OleMenuCommand(Apply, cmdID);
+                    mc.Text = perspective.Name;
+                    mcs.AddCommand(mc);
+                }
+               
                 i++;
             }
-        }
-
-        void mc_BeforeQueryStatus(object sender, EventArgs e)
-        {
-            var dte = (DTE)GetService(typeof(DTE));
-            var per = new Perspective(dte);
-
-            OleMenuCommand menuCommand = sender as OleMenuCommand;
-            if (null != menuCommand)
-            {
-                int MRUItemIndex = menuCommand.CommandID.ID - 0x0109;
-                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives().Count())
-                {
-                    menuCommand.Text = per.GetPerspectives().ElementAt(MRUItemIndex).Name;
-                }
-            }
+            _lastInt = i;
         }
 
         private void Apply(object sender, EventArgs args)
@@ -151,7 +164,7 @@ namespace AdamDriscoll.Perspectives
             if (null != menuCommand)
             {
                 int MRUItemIndex = menuCommand.CommandID.ID - 0x0109;
-                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives().Count())
+                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives(true).Count())
                 {
                     per.GetPerspectives().ElementAt(MRUItemIndex).Apply();
                 }
@@ -168,17 +181,23 @@ namespace AdamDriscoll.Perspectives
 
         private void SaveAsCurrent(object sender, EventArgs args)
         {
-            var name = new PerspectiveName();
-            var result = name.ShowDialog();
-            if (!result.HasValue || !result.Value)
+            // Get the instance number 0 of this tool window. This window is single instance so this instance
+            // is actually the only one.
+            // The last flag is set to true so that if the tool window does not exists it will be created.
+            ToolWindowPane window = this.FindToolWindow(typeof(PerspectivesToolWindow), 0, true);
+            if ((null == window) || (null == window.Frame))
             {
-                return;
+                throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
 
             var dte = (DTE)GetService(typeof(DTE));
-            var per = new Perspective(dte);
+            (window as PerspectivesToolWindow).SetDte(dte);
+            (window as PerspectivesToolWindow).SaveAs();
+            (window as PerspectivesToolWindow).SetPerspectives(new Perspective(dte).GetPerspectives(true));
 
-            per.AddNew(name.PerspectiveNameText);
+            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
+            
+            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
 
         #endregion

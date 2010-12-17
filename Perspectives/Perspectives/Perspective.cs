@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using EnvDTE;
 
 namespace AdamDriscoll.Perspectives
@@ -9,12 +7,13 @@ namespace AdamDriscoll.Perspectives
     public class Perspective
     {
         private readonly DTE _dte;
+        private static List<Perspective> _cache;
 
         private WindowConfiguration Configuration { get; set; }
 
         public Perspective(DTE dte)
         {
-            this._dte = dte;
+            _dte = dte;
         }
 
         public string Name
@@ -27,7 +26,16 @@ namespace AdamDriscoll.Perspectives
 
         public IEnumerable<Perspective> GetPerspectives()
         {
-            List<Perspective> p = new List<Perspective>();
+            return GetPerspectives(false);
+        }
+
+        public IEnumerable<Perspective> GetPerspectives(bool cached)
+        {
+            if (cached && _cache != null)
+            {
+                return _cache;
+            }
+            var p = new List<Perspective>();
             for (var i = 1; i <= _dte.WindowConfigurations.Count; i++)
             {
                 try
@@ -38,8 +46,10 @@ namespace AdamDriscoll.Perspectives
                 {
                     continue;
                 }
-               
             }
+
+            _cache = p;
+
             return p;
         }
 
@@ -49,7 +59,11 @@ namespace AdamDriscoll.Perspectives
             addPer.Update();
             addPer.Apply();
             
-            return new Perspective(_dte) { Configuration = addPer };
+            var p = new Perspective(_dte) { Configuration = addPer };
+
+            _cache.Add(p);
+
+            return p;
         }
 
         public void Apply()
@@ -60,6 +74,8 @@ namespace AdamDriscoll.Perspectives
         public void Delete()
         {
             Configuration.Delete();
+
+            _cache.Remove(_cache.Where(m => m.Name.Equals(this.Name)).First());
         }
 
         public void Update()

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using EnvDTE;
@@ -40,18 +41,8 @@ namespace AdamDriscoll.Perspectives
 
         private void SaveAs_Click(object sender, RoutedEventArgs e)
         {
-            var name = new PerspectiveName();
-            var result = name.ShowDialog();
+            nameGrid.Visibility = Visibility.Visible;
 
-            if (!result.HasValue || result.Value == false)
-            {
-                return;
-            }
-
-            var perspective = new Perspective(Dte);
-            perspective.AddNew(name.PerspectiveNameText);
-            
-            RefreshUi();
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
@@ -107,6 +98,45 @@ namespace AdamDriscoll.Perspectives
             p.Save();
             
             RefreshUi();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var name = txtName.Text;
+            var perspective = new Perspective(Dte);
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                MessageBox.Show("Please enter a name.", "Empty name", MessageBoxButton.OK,
+                                                            MessageBoxImage.Information);
+                return;
+            }
+
+            if (perspective.GetPerspectives(true).Any(m => m.Name.Equals(name)))
+            {
+                MessageBox.Show("A perspective with that name already exits.", "Duplicate name", MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                return;
+            }
+
+            perspective.AddNew(name);
+
+            txtName.Text = string.Empty;
+            nameGrid.Visibility = System.Windows.Visibility.Collapsed;
+
+            RefreshUi();
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            txtName.Text = string.Empty;
+            nameGrid.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        public void FocusNew()
+        {
+            nameGrid.Visibility = System.Windows.Visibility.Visible;
+            txtName.Focus();
         }
 
     }
