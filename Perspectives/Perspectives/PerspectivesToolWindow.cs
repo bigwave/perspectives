@@ -24,12 +24,16 @@ namespace AdamDriscoll.Perspectives
     [Guid("af0132a0-b958-4962-b4d6-6d90d3362318")]
     public class PerspectivesToolWindow : ToolWindowPane
     {
+        private PerspectivesControl _control;
+
         /// <summary>
         /// Standard constructor for the tool window.
         /// </summary>
         public PerspectivesToolWindow() :
             base(null)
         {
+            
+
             // Set the window title reading it from the resources.
             this.Caption = Resources.ToolWindowTitle;
             // Set the image that will appear on the tab of the window frame
@@ -43,22 +47,39 @@ namespace AdamDriscoll.Perspectives
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on 
             // the object returned by the Content property.
-            base.Content = new PerspectivesControl();
+            _control = new PerspectivesControl();
+
+
+            base.Content = _control;
+        }
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+
+            _control.Loaded += new RoutedEventHandler(_control_Loaded);
+        }
+
+        void _control_Loaded(object sender, RoutedEventArgs e)
+        {
+            var dte = (DTE)GetService(typeof(EnvDTE.DTE));
+            _control.Dte = dte;
+            _control.RefreshUi();
         }
 
         public void SetPerspectives(IEnumerable<Perspective> perspectives)
         {
-           ((base.Content) as PerspectivesControl).SetPerspectives(perspectives);
+          _control.SetPerspectives(perspectives);
         }
 
         public void SetDte(DTE dte)
         {
-            ((base.Content) as PerspectivesControl).Dte = dte;
+            _control.Dte = dte;
         }
 
         public void SaveAs()
         {
-            ((base.Content) as PerspectivesControl).FocusNew();
+            _control.FocusNew();
         }
 
 

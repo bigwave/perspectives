@@ -49,6 +49,8 @@ namespace AdamDriscoll.Perspectives
             Trace.WriteLine(string.Format(CultureInfo.CurrentCulture, "Entering constructor for: {0}", this.ToString()));
         }
 
+        internal DTE Dte { get; set; }
+
         /// <summary>
         /// This function is called when the user clicks the menu item that shows the 
         /// tool window. See the Initialize method to see how the menu item is associated to 
@@ -64,10 +66,6 @@ namespace AdamDriscoll.Perspectives
             {
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
-
-            var dte = (DTE) GetService(typeof (DTE));
-            (window as PerspectivesToolWindow).SetDte(dte);
-            (window as PerspectivesToolWindow).SetPerspectives(new Perspective(dte).GetPerspectives(true));
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
@@ -86,6 +84,8 @@ namespace AdamDriscoll.Perspectives
         {
             Trace.WriteLine (string.Format(CultureInfo.CurrentCulture, "Entering Initialize() of: {0}", this.ToString()));
             base.Initialize();
+
+            Dte = (DTE)GetService(typeof(DTE));
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -110,6 +110,9 @@ namespace AdamDriscoll.Perspectives
                 mcs.AddCommand( menuToolWin );
             }
         }
+
+
+
 
         private int _lastInt = 1;
 
