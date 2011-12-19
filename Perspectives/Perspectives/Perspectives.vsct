@@ -47,6 +47,15 @@
         
       </Menu>
 
+      <Menu guid="guidPerspectivesCmdSet" id="toolbarId" priority="0x0000" type="Toolbar">
+        <Parent guid="guidPerspectivesCmdSet" id="0"/>
+        <CommandFlag>DefaultDocked</CommandFlag>
+        <Strings>
+          <ButtonText>Perspectives Toolbar</ButtonText>
+          <CommandName>Perspectives Toolbar</CommandName>
+        </Strings>
+      </Menu>
+
       <Menu
       guid="guidPerspectivesCmdSet" id="menuIDPerspectivesList"
       priority="0x0100" type="Menu">
@@ -55,6 +64,18 @@
           <ButtonText>Perspectives</ButtonText>
         </Strings>
 
+      </Menu>
+
+      <Menu guid="guidPerspectivesCmdSet" id="menuController"
+      priority="0x0100" type="MenuController">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId"/>
+        <CommandFlag>IconAndText</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <CommandFlag>TextIsAnchorCommand</CommandFlag>
+        <Strings>
+          <ButtonText>Test Menu Controller</ButtonText>
+          <CommandName>Test Menu Controller</CommandName>
+        </Strings>
       </Menu>
       
     </Menus>
@@ -81,6 +102,15 @@
         <Parent guid="guidPerspectivesCmdSet" id="menuIDPerspectivesList"/>
       </Group>
 
+      <Group guid="guidPerspectivesCmdSet" id="toolbarGroupId" priority="0x0100">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarId"/>
+      </Group>
+
+      <Group guid="guidPerspectivesCmdSet" id="menuControllerGroup"
+      priority="0x000">
+        <Parent guid="guidPerspectivesCmdSet" id="menuController"/>
+      </Group>
+      
     </Groups>
     
     <!--Buttons section. -->
@@ -95,12 +125,39 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node or set it to <Icon guid="guidOfficeIcon" id="msotcidNoIcon" /> -->
 
-      <Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
+      <!--<Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
         <Parent guid="guidPerspectivesCmdSet" id="groupIDManager" />
         <Icon guid="guidImages" id="manager" />
         <Strings>
           <CommandName>cmdidViewManager</CommandName>
           <ButtonText>View Perspective Manager</ButtonText>
+        </Strings>
+      </Button>-->
+
+      <Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId" />
+        <Icon guid="guidImages" id="manager" />
+        <Strings>
+          <CommandName>cmdidViewManager</CommandName>
+          <ButtonText>View Perspective Manager</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidPerspectivesCmdSet" id="cmdidSaveToolbar" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId"/>
+        <Icon guid="guidImages" id="save" />
+        <Strings>
+          <CommandName>cmdidSave</CommandName>
+          <ButtonText>Save Current</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidPerspectivesCmdSet" id="cmdidSaveAsToolbar" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId"/>
+        <Icon guid="guidImages" id="save" />
+        <Strings>
+          <CommandName>cmdidSaveAs</CommandName>
+          <ButtonText>Save Current as...</ButtonText>
         </Strings>
       </Button>
 
@@ -133,6 +190,18 @@
         </Strings>
       </Button>
 
+      <Button guid="guidPerspectivesCmdSet" id="cmdidToolBarId"
+        type="Button" priority="0x0100">
+        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId" />
+        <CommandFlag>DynamicItemStart</CommandFlag>
+        <CommandFlag>DontCache</CommandFlag>
+        <CommandFlag>TextChanges</CommandFlag>
+        <Strings>
+          <CommandName>cmdidToolBarId</CommandName>
+          <ButtonText></ButtonText>
+        </Strings>
+      </Button>
+
     </Buttons>
    
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -147,8 +216,6 @@
     </Bitmaps>
  
   </Commands>
-
-
 
 
 
@@ -168,6 +235,13 @@
       <IDSymbol name="groupIDPopout" value="0x1070" />
       <IDSymbol name="MRUListGroup" value="0x1080"/>
       <IDSymbol name="cmdidMRUList" value="0x0109"/>
+      <IDSymbol name="toolbarId" value="0x200" />
+      <IDSymbol name="cmdidSaveToolbar" value="0x240" />
+      <IDSymbol name="toolbarGroupId" value="0x210" />
+      <IDSymbol name="menuController" value="0x220"/>
+      <IDSymbol name="menuControllerGroup" value="0x230"/>
+      <IDSymbol name="cmdidSaveAsToolbar" value="0x250"/>
+      <IDSymbol name="cmdidToolBarId" value="0x0300"/>
     </GuidSymbol>
     
     

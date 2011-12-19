@@ -77,11 +77,15 @@ namespace AdamDriscoll.Perspectives
             _control.Dte = dte;
         }
 
-        public void SaveAs()
+        public void RefreshUI()
         {
-            _control.FocusNew();
+            _control.RefreshUi();
         }
 
+        public void RefreshFavorites(Action a)
+        {
+            _control.RefreshFavorites = a;
+        }
 
     }
 }

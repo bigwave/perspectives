@@ -38,6 +38,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualStudio.OLE.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop" />
     <Reference Include="Microsoft.VisualStudio.Shell.Interop.8.0" />
@@ -161,13 +162,21 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="remove-from-favorites.ico" />
     <None Include="Resources\301.bmp" />
     <Resource Include="Resources\Images.bmp" />
     <Resource Include="current.ico" />
+    <Resource Include="Button-Check.ico" />
+    <Resource Include="Button-New.ico" />
+    <Resource Include="Button-Remove.ico" />
+    <Resource Include="Drive-Green.ico" />
+    <Resource Include="add-to-favorites.ico" />
+    <Resource Include="Actions-view-refresh.ico" />
     <Content Include="image1.PNG">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
+    <Resource Include="navigate-right.ico" />
     <Content Include="perspectives_logo.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>

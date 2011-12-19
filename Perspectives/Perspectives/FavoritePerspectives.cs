@@ -14,12 +14,20 @@ namespace AdamDriscoll.Perspectives
 
         static FavoritePerspectives()
         {
-            favPath = Path.Combine(Environment.CurrentDirectory, "perspectives.favorites.xml");
+            favPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Perspectives\\perspectives.favorites.xml");
+
+            var info = new FileInfo(favPath);
+
+            if (!info.Directory.Exists)
+            {
+                info.Directory.Create();
+            }
+
         }
 
         public FavoritePerspectives()
         {
-            MyFavorites = new List<Perspective>();
+            MyFavorites = new List<string>();
         }
 
         public void Save()
@@ -28,7 +36,7 @@ namespace AdamDriscoll.Perspectives
             try
             {
                 writer = new StreamWriter(favPath);
-                var s = new XmlSerializer(typeof(List<Perspective>));
+                var s = new XmlSerializer(typeof(List<string>));
                 s.Serialize(writer, MyFavorites);
             }
             catch (Exception)
@@ -52,13 +60,12 @@ namespace AdamDriscoll.Perspectives
             try
             {
                 reader = new StreamReader(favPath);
-                var s = new XmlSerializer(typeof(List<Perspective>));
-                MyFavorites = (List<Perspective>)s.Deserialize(reader);
+                var s = new XmlSerializer(typeof(List<string>));
+                MyFavorites = (List<string>)s.Deserialize(reader);
             }
             catch (Exception)
             {
-                MessageBox.Show("Failed to load perspectives file!", "IO Failure", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MyFavorites = new List<string>();
             }
             finally
             {
@@ -70,7 +77,7 @@ namespace AdamDriscoll.Perspectives
             }
         }
 
-        public List<Perspective> MyFavorites { get; private set; }
+        public List<string> MyFavorites { get; private set; }
 
 
 

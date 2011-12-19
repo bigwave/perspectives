@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EnvDTE;
 
@@ -8,12 +9,15 @@ namespace AdamDriscoll.Perspectives
     {
         private readonly DTE _dte;
         private static List<Perspective> _cache;
+        private FavoritePerspectives _favorites;
 
         private WindowConfiguration Configuration { get; set; }
 
         public Perspective(DTE dte)
         {
             _dte = dte;
+            _favorites = new FavoritePerspectives();
+            _favorites.Load();
         }
 
         public string Name
@@ -36,6 +40,7 @@ namespace AdamDriscoll.Perspectives
                 return _cache;
             }
             var p = new List<Perspective>();
+            
             for (var i = 1; i <= _dte.WindowConfigurations.Count; i++)
             {
                 try
@@ -53,8 +58,18 @@ namespace AdamDriscoll.Perspectives
             return p;
         }
 
+        public IEnumerable<Perspective> GetFavoritePerspectives()
+        {
+            return GetPerspectives().Where(m => _favorites.MyFavorites.Contains(m.Name));
+        }
+
         public Perspective AddNew(string name)
         {
+            if (_cache.Any(m => m.Name.Equals(name, System.StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new ArgumentException("A perspective by that name already exists.");
+            }
+
             var addPer = _dte.WindowConfigurations.Add(name);
             addPer.Update();
             addPer.Apply();
@@ -88,6 +103,30 @@ namespace AdamDriscoll.Perspectives
             return Configuration.Name;
         }
 
+        public bool Favorite
+        {
+            get { return _favorites.MyFavorites.Any(m => m.Equals(Name, System.StringComparison.InvariantCultureIgnoreCase)); }
+            set
+            {
+                if (value)
+                {
+                    if (!Favorite)
+                    {
+                        _favorites.MyFavorites.Add(Name);
+                        _favorites.Save();
+                    }
+                }
+                else
+                {
+                    if (Favorite)
+                    {
+                        _favorites.MyFavorites.Remove(Name);
+                        _favorites.Save();
+                    }
+                }
+            }
+        }
+
         public Perspective Current
         {
             get
@@ -103,9 +142,26 @@ namespace AdamDriscoll.Perspectives
                 if (Current.Name.Equals(Name))
                 {
                     return
-                        "pack://application:,,,/Perspectives;component/current.ico";
+                        "pack://application:,,,/Perspectives;component/navigate-right.ico";
                 }
                 return string.Empty;
+            }
+        }
+
+        public string FavoriteIconUrl
+        {
+            get
+            {
+                if (!Favorite)
+                {
+                    return
+                        "pack://application:,,,/Perspectives;component/add-to-favorites.ico";
+                }
+                else
+                {
+                    return
+                        "pack://application:,,,/Perspectives;component/remove-from-favorites.ico";
+                }
             }
         }
     }

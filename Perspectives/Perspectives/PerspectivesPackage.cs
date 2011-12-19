@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
+using System.Threading.Tasks;
+using System.Windows;
 using EnvDTE;
 using Microsoft.Win32;
 using Microsoft.VisualStudio;
@@ -67,6 +71,10 @@ namespace AdamDriscoll.Perspectives
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
 
+            var dte = (DTE)GetService(typeof(DTE));
+            (window as PerspectivesToolWindow).SetDte(dte);
+            (window as PerspectivesToolWindow).RefreshFavorites(RebuildToolbar);
+
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
         }
@@ -75,6 +83,8 @@ namespace AdamDriscoll.Perspectives
         /////////////////////////////////////////////////////////////////////////////
         // Overriden Package Implementation
         #region Package Members
+
+
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -93,40 +103,74 @@ namespace AdamDriscoll.Perspectives
             {
                 // Create the command for the menu item.
                 CommandID saveCommandId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSave);
-
                 OleMenuCommand saveMenuItem = new OleMenuCommand(SaveCurrent, saveCommandId);
-
-                saveMenuItem.BeforeQueryStatus += InitMruMenu;
-
                 mcs.AddCommand(saveMenuItem);
 
+                CommandID saveToolbarCommandId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSaveToolbar);
+                OleMenuCommand saveToolbarItem = new OleMenuCommand(SaveCurrent, saveToolbarCommandId);
+                mcs.AddCommand(saveToolbarItem);
+
                 CommandID menuCommandID = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSaveAs);
-                MenuCommand menuItem = new MenuCommand(SaveAsCurrent, menuCommandID);
+                OleMenuCommand menuItem = new OleMenuCommand(SaveAsCurrent, menuCommandID);
                 mcs.AddCommand(menuItem);
+
+                CommandID toolbarSaveAsCommandID = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidSaveAsToolbar);
+                OleMenuCommand saveAsItem = new OleMenuCommand(SaveAsCurrent, toolbarSaveAsCommandID);
+                mcs.AddCommand(saveAsItem);
 
                 // Create the command for the tool window
                 CommandID toolwndCommandID = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidViewManager);
-                MenuCommand menuToolWin = new MenuCommand(ShowToolWindow, toolwndCommandID);
+                OleMenuCommand menuToolWin = new OleMenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
+
+                CommandID mruListId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidMRUList);
+                OleMenuCommand mruItem = new OleMenuCommand(SaveAsCurrent, mruListId);
+
+                mruItem.BeforeQueryStatus += InitMruMenu;
+
+                mcs.AddCommand(mruItem);
+
+
+                CommandID toolBarId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidToolbar);
+                OleMenuCommand toolitem = new OleMenuCommand(SaveAsCurrent, toolBarId);
+                toolitem.BeforeQueryStatus += InitMruMenu;
+                
+                mcs.AddCommand(toolitem);
             }
         }
 
-
-
-
+        private const int baseMenuId = (int)PkgCmdIDList.cmdidMRUList;
+        private const int baseToolbarId = (int)PkgCmdIDList.cmdidToolbar;
         private int _lastInt = 1;
+        private int _lastToolbarId = 1;
 
         private void InitMruMenu(object sender, EventArgs e)
         {
+            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
            var dte = (DTE)GetService(typeof(DTE));
             var per = new Perspective(dte);
 
-            var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            _lastInt = BuildDynamicMenuItems(mcs, per, baseMenuId);
+            BuildToolBar(mcs, per, baseToolbarId);
+        }
 
-            for (int x = _lastInt - 1; x >= 0; x--)
+        public void RebuildToolbar()
+        {
+            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            var dte = (DTE)GetService(typeof(DTE));
+            var per = new Perspective(dte);
+            BuildToolBar(mcs, per, baseToolbarId);
+        }
+
+        private void BuildToolBar(OleMenuCommandService mcs, Perspective per, int baseId)
+        {
+            //
+            //  Remove the other ones
+            //
+            for (int x = _lastToolbarId - 1; x >= 0; x--)
             {
                 var cmdId = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, 0x0109 + x);
+                    GuidList.guidPerspectivesCmdSet, baseId + x);
 
                 var mc = mcs.FindCommand(cmdId) as OleMenuCommand;
                 if (mc != null)
@@ -135,11 +179,58 @@ namespace AdamDriscoll.Perspectives
                 }
             }
 
+            //
+            //  Add the new ones
+            //
+            int i = 0;
+            foreach (var perspective in per.GetFavoritePerspectives())
+            {
+                var cmdID = new CommandID(
+                    GuidList.guidPerspectivesCmdSet, baseId + i);
+
+                var mc = mcs.FindCommand(cmdID) as OleMenuCommand;
+                if (mc != null)
+                {
+                    mc.Text = perspective.Name;
+                }
+                else
+                {
+                    mc = new OleMenuCommand(Apply, cmdID);
+                    mc.Text = perspective.Name;
+                    mc.BeforeQueryStatus += OnMRUQueryStatus;
+                    mcs.AddCommand(mc);
+                }
+
+                i++;
+            }
+            _lastToolbarId = i;
+        }
+
+        private int BuildDynamicMenuItems(OleMenuCommandService mcs, Perspective per, int baseId)
+        {
+            //
+            //  Remove the other ones
+            //
+            for (int x = _lastInt - 1; x >= 0; x--)
+            {
+                var cmdId = new CommandID(
+                    GuidList.guidPerspectivesCmdSet, baseId + x);
+
+                var mc = mcs.FindCommand(cmdId) as OleMenuCommand;
+                if (mc != null)
+                {
+                    mcs.RemoveCommand(mc);
+                }
+            }
+
+            //
+            //  Add the new ones
+            //
             int i = 0;
             foreach(var perspective in per.GetPerspectives(true))
             {
                 var cmdID = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, 0x0109 + i);
+                    GuidList.guidPerspectivesCmdSet, baseId + i);
                 
                 var mc = mcs.FindCommand(cmdID) as OleMenuCommand;
                 if (mc != null)
@@ -150,13 +241,43 @@ namespace AdamDriscoll.Perspectives
                 {
                     mc = new OleMenuCommand(Apply, cmdID);
                     mc.Text = perspective.Name;
+                    mc.BeforeQueryStatus += OnMRUQueryStatus;
                     mcs.AddCommand(mc);
                 }
                
                 i++;
             }
-            _lastInt = i;
+            return i;
         }
+
+        private void OnMRUQueryStatus(object sender, EventArgs e)
+        {
+            var dte = (DTE)GetService(typeof(DTE));
+            var per = new Perspective(dte);
+
+            OleMenuCommand menuCommand = sender as OleMenuCommand;
+            if (null != menuCommand)
+            {
+                int MRUItemIndex = 0;
+                if (menuCommand.CommandID.ID < baseToolbarId)
+                {
+                    MRUItemIndex = menuCommand.CommandID.ID - baseMenuId;
+                }
+
+                else
+                {
+                    MRUItemIndex = menuCommand.CommandID.ID - baseToolbarId;
+                }
+
+                
+
+                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives(true).Count())
+                {
+                    menuCommand.Text = per.GetPerspectives(true).ElementAt(MRUItemIndex).Name;
+                }
+            }
+        }
+
 
         private void Apply(object sender, EventArgs args)
         {
@@ -166,11 +287,23 @@ namespace AdamDriscoll.Perspectives
             var menuCommand = sender as OleMenuCommand;
             if (null != menuCommand)
             {
-                int MRUItemIndex = menuCommand.CommandID.ID - 0x0109;
+                int MRUItemIndex = 0;
+                if (menuCommand.CommandID.ID < baseToolbarId)
+                {
+                    MRUItemIndex =  menuCommand.CommandID.ID - baseMenuId;
+                }
+
+                else
+                {
+                    MRUItemIndex = menuCommand.CommandID.ID - baseToolbarId;
+                }
+
                 if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives(true).Count())
                 {
                     per.GetPerspectives().ElementAt(MRUItemIndex).Apply();
                 }
+
+                RefreshPerspectivesManager();
             }
         }
 
@@ -179,28 +312,41 @@ namespace AdamDriscoll.Perspectives
             var dte = (DTE)GetService(typeof(DTE));
             var per = new Perspective(dte);
 
-            per.Current.Apply();
+            per.Current.Update();
         }
 
-        private void SaveAsCurrent(object sender, EventArgs args)
+        private void RefreshPerspectivesManager()
         {
-            // Get the instance number 0 of this tool window. This window is single instance so this instance
-            // is actually the only one.
-            // The last flag is set to true so that if the tool window does not exists it will be created.
             ToolWindowPane window = this.FindToolWindow(typeof(PerspectivesToolWindow), 0, true);
             if ((null == window) || (null == window.Frame))
             {
                 throw new NotSupportedException(Resources.CanNotCreateWindow);
             }
+            (window as PerspectivesToolWindow).RefreshUI();
+        }
+
+        private void SaveAsCurrent(object sender, EventArgs args)
+        {
+            var response = Microsoft.VisualBasic.Interaction.InputBox("Enter a name for your perspective.", "Enter name");
+
+            if (String.IsNullOrWhiteSpace(response))
+            {
+                return;
+            }
 
             var dte = (DTE)GetService(typeof(DTE));
-            (window as PerspectivesToolWindow).SetDte(dte);
-            (window as PerspectivesToolWindow).SaveAs();
-            (window as PerspectivesToolWindow).SetPerspectives(new Perspective(dte).GetPerspectives(true));
+            var per = new Perspective(dte);
+            try
+            {
+                per.AddNew(response);    
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error adding new perspective", MessageBoxButton.OK, MessageBoxImage.Error);
+                SaveAsCurrent(sender, args);
+            }
 
-            IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
-            
-            Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
+            RefreshPerspectivesManager();
         }
 
         #endregion

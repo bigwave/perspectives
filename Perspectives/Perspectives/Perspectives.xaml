@@ -8,50 +8,92 @@
              d:DesignHeight="300" d:DesignWidth="300"
              Name="MyToolWindow"
              Background="{DynamicResource {x:Static vsfx:VsBrushes.ToolWindowBackgroundKey}}">
-    <Grid >
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="40"/>
 
-        </Grid.RowDefinitions>
-            
+    <UserControl.Resources>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <EventSetter Event="Button.Click" Handler="Refresh_Click"></EventSetter>
+        </Style>
+        <Style x:Key="myHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid >
+        
+
         <ListView Name="lstPerspectives"  Grid.Row="0">
+            <ListView.Style>
+                <Style TargetType="ListView">
+                    <Style.Triggers>
+                        <Trigger Property="HasItems"
+                         Value="False">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListView">
+                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center"> 
+                                            <TextBlock HorizontalAlignment="Center">Click to refresh the Perspectives Manager.</TextBlock>
+                                            <Button HorizontalAlignment="Center" Style="{DynamicResource ButtonStyle}" Margin="5" Background="Transparent" BorderBrush="Transparent"> 
+                                                <Image Width="48" Height="48" Source="pack://application:,,,/Perspectives;component/Actions-view-refresh.ico"/>
+                                            </Button>
+                                        </StackPanel>
+                                        
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Style>
             <ListView.View>
-                <GridView>
-                    <GridViewColumn>
+                <GridView  ColumnHeaderContainerStyle="{StaticResource myHeaderStyle}">
+                    <GridViewColumn Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Image Width="16" Height="16" Source="{Binding IconUri}"/>
-                                    <TextBlock Text="{Binding Name}"/>
-                                </StackPanel>
+                                <Image Width="16" Height="16" Source="{Binding IconUri}"/>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn>
+                        <TextBlock Text="{Binding Name}" />
+                    </GridViewColumn>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button ToolTip="Apply" Click="Apply_Click" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" >
+                                    <Image Width="16" Height="16" Source="pack://application:,,,/Perspectives;component/Button-Check.ico"/>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button ToolTip="Display on toolbar" Click="Fav_Click"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
+                                    <Image Width="16" Height="16"  Source="{Binding FavoriteIconUrl}"/>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button ToolTip="Save" Click="Save_Click"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
+                                    <Image Width="16" Height="16" Source="pack://application:,,,/Perspectives;component/Drive-Green.ico"/>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button ToolTip="Delete" Click="Delete_Click"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
+                                    <Image Width="16" Height="16" Source="pack://application:,,,/Perspectives;component/Button-Remove.ico"/>
+                                </Button>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1">
-                <Button Click="Apply_Click" Margin="5,5,5,5" Padding="3,3,3,3">Apply</Button>
-                
-                <Button Click="SaveAs_Click" Margin="5,5,5,5" Padding="3,3,3,3">Save Current As...</Button>
-                <Button Click="Save_Click" Margin="5,5,5,5" Padding="3,3,3,3">Save Current</Button>
-                <Button Click="Delete_Click" Margin="5,5,5,5" Padding="3,3,3,3">Delete</Button>
-            </StackPanel>
-        
-        <Grid Grid.Row="2" x:Name="nameGrid" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*"/>
-                <ColumnDefinition  Width="2*"/>
-                <ColumnDefinition  Width="1*"/>
-                <ColumnDefinition  Width="1*"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center" Padding="5,5,5,5" Grid.Column="0">Name:</TextBlock>
-            <TextBox x:Name="txtName" Margin="5,5,5,5" Width="{Binding ElementName=Container,Path=ActualWidth}" HorizontalAlignment="Stretch" MaxWidth="200" Grid.Column="1"></TextBox>
-            <Button Margin="5,5,5,5" Grid.Column="2" Click="Button_Click">Ok</Button>
-            <Button Margin="5,5,5,5" Grid.Column="3" Click="Button_Click_1">Cancel</Button>
-        </Grid>
     </Grid>
 </UserControl>
