@@ -21,7 +21,7 @@
   <Extern href="vsshlids.h"/>
 
   <!--Definition of some VSCT specific constants. In this sample we use it for the IDs inside the guidOfficeIcon group. -->
-  <Extern href="msobtnid.h"/>
+  <!--<Extern href="msobtnid.h"/>-->
 
 
 
@@ -44,7 +44,6 @@
         <Strings>
           <ButtonText>Perspectives</ButtonText>
         </Strings>
-        
       </Menu>
 
       <Menu guid="guidPerspectivesCmdSet" id="toolbarId" priority="0x0000" type="Toolbar">
@@ -98,10 +97,6 @@
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_WINDOW"/>
       </Group>
 
-      <Group guid="guidPerspectivesCmdSet" id="MRUListGroup" priority="0x100">
-        <Parent guid="guidPerspectivesCmdSet" id="menuIDPerspectivesList"/>
-      </Group>
-
       <Group guid="guidPerspectivesCmdSet" id="toolbarGroupId" priority="0x0100">
         <Parent guid="guidPerspectivesCmdSet" id="toolbarId"/>
       </Group>
@@ -125,15 +120,35 @@
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node or set it to <Icon guid="guidOfficeIcon" id="msotcidNoIcon" /> -->
 
-      <!--<Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
-        <Parent guid="guidPerspectivesCmdSet" id="groupIDManager" />
+      <!-- Window Menu Buttons -->
+      <Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="groupIDPopout" />
         <Icon guid="guidImages" id="manager" />
         <Strings>
           <CommandName>cmdidViewManager</CommandName>
           <ButtonText>View Perspective Manager</ButtonText>
         </Strings>
-      </Button>-->
+      </Button>
 
+      <Button guid="guidPerspectivesCmdSet" id="cmdidSave" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="groupIDPopout"/>
+        <Icon guid="guidImages" id="save" />
+        <Strings>
+          <CommandName>cmdidSave</CommandName>
+          <ButtonText>Save Current Perspective</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidPerspectivesCmdSet" id="cmdidSaveAs" priority="0x0100" type="Button">
+        <Parent guid="guidPerspectivesCmdSet" id="groupIDPopout"/>
+        <Icon guid="guidImages" id="save" />
+        <Strings>
+          <CommandName>cmdidSaveAs</CommandName>
+          <ButtonText>Save Current Perspective as...</ButtonText>
+        </Strings>
+      </Button>
+
+      <!-- Toolbar Buttons -->
       <Button guid="guidPerspectivesCmdSet" id="cmdidViewManager" priority="0x0100" type="Button">
         <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId" />
         <Icon guid="guidImages" id="manager" />
@@ -142,6 +157,7 @@
           <ButtonText>View Perspective Manager</ButtonText>
         </Strings>
       </Button>
+
 
       <Button guid="guidPerspectivesCmdSet" id="cmdidSaveToolbar" priority="0x0100" type="Button">
         <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId"/>
@@ -160,49 +176,18 @@
           <ButtonText>Save Current as...</ButtonText>
         </Strings>
       </Button>
-
-
-      <Button guid="guidPerspectivesCmdSet" id="cmdidSave" priority="0x0100" type="Button">
-        <Parent guid="guidPerspectivesCmdSet" id="groupIDperspectives"/>
-        <Icon guid="guidImages" id="save" />
-        <Strings>
-          <CommandName>cmdidSave</CommandName>
-          <ButtonText>Save Current</ButtonText>
-        </Strings>
-      </Button>
-
-      <Button guid="guidPerspectivesCmdSet" id="cmdidSaveAs" priority="0x0100" type="Button">
-        <Parent guid="guidPerspectivesCmdSet" id="groupIDperspectives"/>
-        <Icon guid="guidImages" id="save" />
-        <Strings>
-          <CommandName>cmdidSaveAs</CommandName>
-          <ButtonText>Save Current as...</ButtonText>
-        </Strings>
-      </Button>
-
-      <Button guid="guidPerspectivesCmdSet" id="cmdidMRUList"
-        type="Button" priority="0x0100">
-        <Parent guid="guidPerspectivesCmdSet" id="MRUListGroup" />
-        <CommandFlag>DynamicItemStart</CommandFlag>
-        <Strings>
-          <CommandName>cmdidMRUList</CommandName>
-          <ButtonText>Load perspectives...</ButtonText>
-        </Strings>
-      </Button>
-
-      <Button guid="guidPerspectivesCmdSet" id="cmdidToolBarId"
-        type="Button" priority="0x0100">
-        <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId" />
-        <CommandFlag>DynamicItemStart</CommandFlag>
-        <CommandFlag>DontCache</CommandFlag>
-        <CommandFlag>TextChanges</CommandFlag>
-        <Strings>
-          <CommandName>cmdidToolBarId</CommandName>
-          <ButtonText></ButtonText>
-        </Strings>
-      </Button>
-
     </Buttons>
+
+    <Combos>
+      <Combo guid="guidPerspectivesCmdSet" id="cmdidFavoriteDropDownList"
+              priority="0x0500" type="DropDownCombo" defaultWidth="100"
+              idCommandList="cmdidFavoriteDropDownListItems">
+          <Parent guid="guidPerspectivesCmdSet" id="toolbarGroupId"/>
+          <Strings>
+            <ButtonText>Favorites</ButtonText>
+          </Strings>
+        </Combo>
+    </Combos>
    
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
     <Bitmaps>
@@ -217,12 +202,23 @@
  
   </Commands>
 
-
+  <KeyBindings>
+    <KeyBinding guid="guidPerspectivesCmdSet" id="cmdidApplyFav1"
+      editor="guidVSStd97" key1="VK_F1" mod1="SHIFT" mod2="CONTROL"/>
+    <KeyBinding guid="guidPerspectivesCmdSet" id="cmdidApplyFav2"
+      editor="guidVSStd97" key1="VK_F2" mod1="SHIFT" mod2="CONTROL"/>
+    <KeyBinding guid="guidPerspectivesCmdSet" id="cmdidApplyFav3"
+      editor="guidVSStd97" key1="VK_F3" mod1="SHIFT" mod2="CONTROL"/>
+    <KeyBinding guid="guidPerspectivesCmdSet" id="cmdidApplyFav4"
+      editor="guidVSStd97" key1="VK_F4" mod1="SHIFT" mod2="CONTROL"/>
+    <KeyBinding guid="guidPerspectivesCmdSet" id="cmdidApplyFav5"
+      editor="guidVSStd97" key1="VK_F5" mod1="SHIFT" mod2="CONTROL"/>
+  </KeyBindings>
 
   <Symbols>
     <!-- This is the package guid. -->
     <GuidSymbol name="guidPerspectivesPkg" value="{7d37ba47-aaa0-4b8a-a17d-e7d54172bd0e}" />
-    
+
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidPerspectivesCmdSet" value="{7b761763-1470-4789-9162-86aef9666354}">
       <IDSymbol name="groupIDManager" value="0x1010" />
@@ -233,24 +229,29 @@
       <IDSymbol name="menuIDPerspectives" value="0x0106" />
       <IDSymbol name="menuIDPerspectivesList" value="0x0206" />
       <IDSymbol name="groupIDPopout" value="0x1070" />
-      <IDSymbol name="MRUListGroup" value="0x1080"/>
-      <IDSymbol name="cmdidMRUList" value="0x0109"/>
       <IDSymbol name="toolbarId" value="0x200" />
-      <IDSymbol name="cmdidSaveToolbar" value="0x240" />
       <IDSymbol name="toolbarGroupId" value="0x210" />
       <IDSymbol name="menuController" value="0x220"/>
       <IDSymbol name="menuControllerGroup" value="0x230"/>
+      <IDSymbol name="cmdidSaveToolbar" value="0x240" />
       <IDSymbol name="cmdidSaveAsToolbar" value="0x250"/>
+      <IDSymbol name="cmdidFavoriteDropDownList" value="0x260" />
+      <IDSymbol name="cmdidFavoriteDropDownListItems" value="0x270" />
+
+      <IDSymbol name="cmdidApplyFav1" value="0x280" />
+      <IDSymbol name="cmdidApplyFav2" value="0x290" />
+      <IDSymbol name="cmdidApplyFav3" value="0x300" />
+      <IDSymbol name="cmdidApplyFav4" value="0x310" />
+      <IDSymbol name="cmdidApplyFav5" value="0x320" />
+
       <IDSymbol name="cmdidToolBarId" value="0x0300"/>
     </GuidSymbol>
-    
-    
-    
+
     <GuidSymbol name="guidImages" value="{71d84350-d2ec-4ec4-bf2b-79f33d48223e}" >
       <IDSymbol name="manager" value="1" />
       <IDSymbol name="check" value="2" />
       <IDSymbol name="save" value="3" />
     </GuidSymbol>
   </Symbols>
-
+ 
 </CommandTable>

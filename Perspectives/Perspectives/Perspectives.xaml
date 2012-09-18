@@ -68,15 +68,6 @@
                     <GridViewColumn Width="40">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Button ToolTip="Display on toolbar" Click="Fav_Click"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
-                                    <Image Width="16" Height="16"  Source="{Binding FavoriteIconUrl}"/>
-                                </Button>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Width="40">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
                                 <Button ToolTip="Save" Click="Save_Click"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0">
                                     <Image Width="16" Height="16" Source="pack://application:,,,/Perspectives;component/Drive-Green.ico"/>
                                 </Button>

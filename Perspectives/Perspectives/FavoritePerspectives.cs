@@ -27,59 +27,77 @@ namespace AdamDriscoll.Perspectives
 
         public FavoritePerspectives()
         {
-            MyFavorites = new List<string>();
+            MyFavorites = new List<Favorite>();
         }
 
         public void Save()
         {
-            TextWriter writer = null;
             try
             {
-                writer = new StreamWriter(favPath);
-                var s = new XmlSerializer(typeof(List<string>));
-                s.Serialize(writer, MyFavorites);
+                using (var writer = new StreamWriter(favPath))
+                {
+                    var s = new XmlSerializer(typeof(List<Favorite>));
+                    s.Serialize(writer, MyFavorites);    
+                }
             }
             catch (Exception)
             {
                 MessageBox.Show("Failed to save perspectives file!", "IO Failure", MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
-            finally
-            {
-                if (writer != null)
-                {
-                    writer.Close();
-                    writer.Dispose();
-                }
-            }
         }
 
         public void Load()
         {
-            TextReader reader = null;
             try
             {
-                reader = new StreamReader(favPath);
-                var s = new XmlSerializer(typeof(List<string>));
-                MyFavorites = (List<string>)s.Deserialize(reader);
+                if (File.Exists(favPath))
+                {
+                    try
+                    {
+                        using (var reader = new StreamReader(favPath))
+                        {
+                            var s = new XmlSerializer(typeof(List<Favorite>));
+                            MyFavorites = (List<Favorite>)s.Deserialize(reader);
+                        }
+
+                    }
+                    catch
+                    {
+                        //Supports backwards compatibility
+                        using (var reader = new StreamReader(favPath))
+                        {
+                            var s = new XmlSerializer(typeof(List<string>));
+                            var names = (List<string>)s.Deserialize(reader);
+
+                            int i = 1;
+                            foreach (var name in names)
+                            {
+                                MyFavorites = new List<Favorite>();
+                                MyFavorites.Add(new Favorite { Name = name, Ordinal = i });
+                                i++;
+                            }
+                        }
+
+                    }
+                }
+                else
+                {
+                    return;
+                }
             }
             catch (Exception)
             {
-                MyFavorites = new List<string>();
-            }
-            finally
-            {
-                if (reader != null)
-                {
-                    reader.Close();
-                    reader.Dispose();
-                }
+                MyFavorites = new List<Favorite>();
             }
         }
 
-        public List<string> MyFavorites { get; private set; }
+        public List<Favorite> MyFavorites { get; private set; }
+    }
 
-
-
+    public class Favorite
+    {
+        public string Name { get; set; }
+        public int Ordinal { get; set; }
     }
 }

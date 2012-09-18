@@ -82,10 +82,5 @@ namespace AdamDriscoll.Perspectives
             _control.RefreshUi();
         }
 
-        public void RefreshFavorites(Action a)
-        {
-            _control.RefreshFavorites = a;
-        }
-
     }
 }

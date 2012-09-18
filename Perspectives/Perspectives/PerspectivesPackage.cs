@@ -73,7 +73,6 @@ namespace AdamDriscoll.Perspectives
 
             var dte = (DTE)GetService(typeof(DTE));
             (window as PerspectivesToolWindow).SetDte(dte);
-            (window as PerspectivesToolWindow).RefreshFavorites(RebuildToolbar);
 
             IVsWindowFrame windowFrame = (IVsWindowFrame)window.Frame;
             Microsoft.VisualStudio.ErrorHandler.ThrowOnFailure(windowFrame.Show());
@@ -123,187 +122,96 @@ namespace AdamDriscoll.Perspectives
                 OleMenuCommand menuToolWin = new OleMenuCommand(ShowToolWindow, toolwndCommandID);
                 mcs.AddCommand( menuToolWin );
 
-                CommandID mruListId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidMRUList);
-                OleMenuCommand mruItem = new OleMenuCommand(SaveAsCurrent, mruListId);
-
-                mruItem.BeforeQueryStatus += InitMruMenu;
-
-                mcs.AddCommand(mruItem);
-
-
                 CommandID toolBarId = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidToolbar);
                 OleMenuCommand toolitem = new OleMenuCommand(SaveAsCurrent, toolBarId);
-                toolitem.BeforeQueryStatus += InitMruMenu;
-                
                 mcs.AddCommand(toolitem);
+
+                CommandID toolbarDropDown = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidFavoriteDropDownList);
+                OleMenuCommand comboBox = new OleMenuCommand(ComboBoxChanged, toolbarDropDown);
+                mcs.AddCommand(comboBox);
+
+                CommandID toolbarDropDownItems = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidFavoriteDropDownListItems);
+                OleMenuCommand comboBoxItems = new OleMenuCommand(ComboBoxPopulate, toolbarDropDownItems);
+                mcs.AddCommand(comboBoxItems);
+
+                CommandID fav1Id = new CommandID(GuidList.guidPerspectivesCmdSet, (int)PkgCmdIDList.cmdidApplyFav1);
+                OleMenuCommand fav1Command = new OleMenuCommand(ApplyFav1, fav1Id);
+                mcs.AddCommand(fav1Command);
             }
         }
 
-        private const int baseMenuId = (int)PkgCmdIDList.cmdidMRUList;
         private const int baseToolbarId = (int)PkgCmdIDList.cmdidToolbar;
         private int _lastInt = 1;
         private int _lastToolbarId = 1;
 
-        private void InitMruMenu(object sender, EventArgs e)
+        private void ApplyFav1(object sender, EventArgs args)
         {
-            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-           var dte = (DTE)GetService(typeof(DTE));
-            var per = new Perspective(dte);
-
-            _lastInt = BuildDynamicMenuItems(mcs, per, baseMenuId);
-            BuildToolBar(mcs, per, baseToolbarId);
+            ApplyFavorite(1);
+        }
+        private void ApplyFav2(object sender, EventArgs args)
+        {
+            ApplyFavorite(2);
+        }
+        private void ApplyFav3(object sender, EventArgs args)
+        {
+            ApplyFavorite(3);
+        }
+        private void ApplyFav4(object sender, EventArgs args)
+        {
+            ApplyFavorite(4);
+        }
+        private void ApplyFav5(object sender, EventArgs args)
+        {
+            ApplyFavorite(5);
         }
 
-        public void RebuildToolbar()
+        private void ApplyFavorite(int ordinal)
         {
-            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             var dte = (DTE)GetService(typeof(DTE));
             var per = new Perspective(dte);
-            BuildToolBar(mcs, per, baseToolbarId);
+            var fav = per.GetFavoritePerspectives().FirstOrDefault(m => m.FavoriteOrdinal == ordinal);
+
+            fav.Apply();
         }
-
-        private void BuildToolBar(OleMenuCommandService mcs, Perspective per, int baseId)
-        {
-            //
-            //  Remove the other ones
-            //
-            for (int x = _lastToolbarId - 1; x >= 0; x--)
-            {
-                var cmdId = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, baseId + x);
-
-                var mc = mcs.FindCommand(cmdId) as OleMenuCommand;
-                if (mc != null)
-                {
-                    mcs.RemoveCommand(mc);
-                }
-            }
-
-            //
-            //  Add the new ones
-            //
-            int i = 0;
-            foreach (var perspective in per.GetFavoritePerspectives())
-            {
-                var cmdID = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, baseId + i);
-
-                var mc = mcs.FindCommand(cmdID) as OleMenuCommand;
-                if (mc != null)
-                {
-                    mc.Text = perspective.Name;
-                }
-                else
-                {
-                    mc = new OleMenuCommand(Apply, cmdID);
-                    mc.Text = perspective.Name;
-                    mc.BeforeQueryStatus += OnMRUQueryStatus;
-                    mcs.AddCommand(mc);
-                }
-
-                i++;
-            }
-            _lastToolbarId = i;
-        }
-
-        private int BuildDynamicMenuItems(OleMenuCommandService mcs, Perspective per, int baseId)
-        {
-            //
-            //  Remove the other ones
-            //
-            for (int x = _lastInt - 1; x >= 0; x--)
-            {
-                var cmdId = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, baseId + x);
-
-                var mc = mcs.FindCommand(cmdId) as OleMenuCommand;
-                if (mc != null)
-                {
-                    mcs.RemoveCommand(mc);
-                }
-            }
-
-            //
-            //  Add the new ones
-            //
-            int i = 0;
-            foreach(var perspective in per.GetPerspectives(true))
-            {
-                var cmdID = new CommandID(
-                    GuidList.guidPerspectivesCmdSet, baseId + i);
-                
-                var mc = mcs.FindCommand(cmdID) as OleMenuCommand;
-                if (mc != null)
-                {
-                    mc.Text = perspective.Name;
-                }
-                else
-                {
-                    mc = new OleMenuCommand(Apply, cmdID);
-                    mc.Text = perspective.Name;
-                    mc.BeforeQueryStatus += OnMRUQueryStatus;
-                    mcs.AddCommand(mc);
-                }
-               
-                i++;
-            }
-            return i;
-        }
-
-        private void OnMRUQueryStatus(object sender, EventArgs e)
+        
+        private void ComboBoxPopulate(object sender, EventArgs args)
         {
             var dte = (DTE)GetService(typeof(DTE));
             var per = new Perspective(dte);
 
-            OleMenuCommand menuCommand = sender as OleMenuCommand;
-            if (null != menuCommand)
+            var comboValues = per.GetPerspectives().Select(m => m.Name).ToArray();
+            var eventArgs = args as OleMenuCmdEventArgs;
+            if (eventArgs != null)
             {
-                int MRUItemIndex = 0;
-                if (menuCommand.CommandID.ID < baseToolbarId)
+                IntPtr output = eventArgs.OutValue;
+                if (output != IntPtr.Zero)
                 {
-                    MRUItemIndex = menuCommand.CommandID.ID - baseMenuId;
-                }
-
-                else
-                {
-                    MRUItemIndex = menuCommand.CommandID.ID - baseToolbarId;
-                }
-
-                
-
-                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives(true).Count())
-                {
-                    menuCommand.Text = per.GetPerspectives(true).ElementAt(MRUItemIndex).Name;
+                    Marshal.GetNativeVariantForObject(comboValues,
+                        output);
                 }
             }
         }
 
-
-        private void Apply(object sender, EventArgs args)
+        private void ComboBoxChanged(object sender, EventArgs args)
         {
-            var dte = (DTE)GetService(typeof(DTE));
-            var per = new Perspective(dte);
-
-            var menuCommand = sender as OleMenuCommand;
-            if (null != menuCommand)
+            var eventArgs = args as OleMenuCmdEventArgs;
+            if (eventArgs != null)
             {
-                int MRUItemIndex = 0;
-                if (menuCommand.CommandID.ID < baseToolbarId)
+                object input = eventArgs.InValue;
+                if (input != null)
                 {
-                    MRUItemIndex =  menuCommand.CommandID.ID - baseMenuId;
-                }
+                    var perspectiveName = input.ToString();
 
-                else
-                {
-                    MRUItemIndex = menuCommand.CommandID.ID - baseToolbarId;
-                }
+                    var dte = (DTE)GetService(typeof(DTE));
+                    var per = new Perspective(dte);
 
-                if (MRUItemIndex >= 0 && MRUItemIndex < per.GetPerspectives(true).Count())
-                {
-                    per.GetPerspectives().ElementAt(MRUItemIndex).Apply();
-                }
+                    per = per.GetPerspectives().FirstOrDefault(m => m.Name.Equals(perspectiveName, StringComparison.OrdinalIgnoreCase));
 
-                RefreshPerspectivesManager();
+                    if (per != null)
+                    {
+                        per.Apply();
+                    }
+                }
             }
         }
 

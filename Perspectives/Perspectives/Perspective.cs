@@ -60,7 +60,7 @@ namespace AdamDriscoll.Perspectives
 
         public IEnumerable<Perspective> GetFavoritePerspectives()
         {
-            return GetPerspectives().Where(m => _favorites.MyFavorites.Contains(m.Name));
+            return GetPerspectives().Where(m => _favorites.MyFavorites.Select(x => x.Name).Contains(m.Name));
         }
 
         public Perspective AddNew(string name)
@@ -105,14 +105,16 @@ namespace AdamDriscoll.Perspectives
 
         public bool Favorite
         {
-            get { return _favorites.MyFavorites.Any(m => m.Equals(Name, System.StringComparison.InvariantCultureIgnoreCase)); }
+            get { return _favorites.MyFavorites.Any(m => m.Name.Equals(Name, System.StringComparison.InvariantCultureIgnoreCase)); }
             set
             {
                 if (value)
                 {
                     if (!Favorite)
                     {
-                        _favorites.MyFavorites.Add(Name);
+                        var ordinal = _favorites.MyFavorites.Max(m => m.Ordinal) + 1;
+
+                        _favorites.MyFavorites.Add(new Favorite { Name = Name, Ordinal = ordinal });
                         _favorites.Save();
                     }
                 }
@@ -120,12 +122,34 @@ namespace AdamDriscoll.Perspectives
                 {
                     if (Favorite)
                     {
-                        _favorites.MyFavorites.Remove(Name);
-                        _favorites.Save();
+                        var fav = _favorites.MyFavorites.FirstOrDefault(m => m.Name.Equals(Name, StringComparison.OrdinalIgnoreCase));
+
+                        if (fav != null)
+                        {
+                            _favorites.MyFavorites.Remove(fav);
+                            _favorites.Save();
+                        }
                     }
                 }
             }
         }
+
+        public int FavoriteOrdinal
+        {
+            get 
+            {
+                if (Favorite)
+                {
+                    var fav = _favorites.MyFavorites.FirstOrDefault(m => m.Name.Equals(Name, System.StringComparison.InvariantCultureIgnoreCase));
+                    if (fav != null)
+                    {
+                        return fav.Ordinal;
+                    }
+                }
+                return -1;
+            }
+        }
+
 
         public Perspective Current
         {

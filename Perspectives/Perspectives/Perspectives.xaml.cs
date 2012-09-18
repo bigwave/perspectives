@@ -18,7 +18,6 @@ namespace AdamDriscoll.Perspectives
         }
 
         public DTE Dte { get; set; }
-        public Action RefreshFavorites { get; set; }
         public void SetPerspectives(IEnumerable<Perspective> perspectives)
         {
             lstPerspectives.ItemsSource = perspectives;
@@ -71,10 +70,6 @@ namespace AdamDriscoll.Perspectives
                 if (view != null)
                 {
                     view.Delete();
-                    if (RefreshFavorites != null)
-                    {
-                        RefreshFavorites();
-                    }
                     RefreshUi();
                 }
             }
@@ -89,10 +84,6 @@ namespace AdamDriscoll.Perspectives
                 if (view != null)
                 {
                     view.Favorite = !view.Favorite;
-                    if (RefreshFavorites != null)
-                    {
-                        RefreshFavorites();
-                    }
                     RefreshUi();                        
                 }
             }
