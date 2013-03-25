@@ -65,12 +65,16 @@ namespace AdamDriscoll.Perspectives
         {
             if (sender is Button)
             {
-                var view = (sender as Button).DataContext as Perspective;
+              
 
-                if (view != null)
-                {
-                    view.Delete();
-                    RefreshUi();
+                    var view = (sender as Button).DataContext as Perspective;
+                    if (MessageBox.Show( string.Format("Delete {0}?",view.Name), "Delete View", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK) //Ask to delete View jacobcordingley 3/25/2013
+                    {
+                    if (view != null)
+                    {
+                        view.Delete();
+                        RefreshUi();
+                    }
                 }
             }
         }
