@@ -1,0 +1,7 @@
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\Perspectives.dll
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\Perspectives.pkgdef
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\extension.vsixmanifest
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\image1.PNG
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\navigate-right.ico
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\perspectives_logo.ico
+C:\Users\ian\AppData\Local\Microsoft\VisualStudio\12.0Exp\Extensions\Adam Driscoll\Perspectives\3.0\\Perspectives.pdb
