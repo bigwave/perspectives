@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="7014b1aa-92e3-4148-8caa-79fa2cd1bb88" Version="3.0" Language="en-US" Publisher="Adam Driscoll" />
+    <Identity Id="7014b1aa-92e3-4148-8caa-79fa2cd1bb88" Version="3.0.1" Language="en-US" Publisher="Adam Driscoll" />
     <DisplayName>Perspectives - 2013</DisplayName>
     <Description xml:space="preserve">Provides windows management functionality much like Eclipse perspectives.
 
@@ -9,6 +9,7 @@ I needed one, couldn't find one on the Visual Studio gallery - so just whipped t
 
 Contact me know when an official package becomes available so that I can remove this one.</Description>
     <MoreInfo>http://perspectives.codeplex.com</MoreInfo>
+    <ReleaseNotes>Display current perspective in drop down.</ReleaseNotes>
     <Icon>perspectives_logo.ico</Icon>
     <PreviewImage>image1.PNG</PreviewImage>
     <Tags>windows management</Tags>
