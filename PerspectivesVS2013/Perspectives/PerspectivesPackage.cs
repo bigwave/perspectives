@@ -198,20 +198,32 @@ namespace AdamDriscoll.Perspectives
             if (eventArgs != null)
             {
                 object input = eventArgs.InValue;
-                if (input != null)
-                {
-                    var perspectiveName = input.ToString();
+				IntPtr vOut = eventArgs.OutValue;
 
-                    var dte = (DTE)GetService(typeof(DTE));
-                    var per = new Perspective(dte);
+				var dte = (DTE)GetService(typeof(DTE));
+				var per = new Perspective(dte);
 
-                    per = per.GetPerspectives().FirstOrDefault(m => m.Name.Equals(perspectiveName, StringComparison.OrdinalIgnoreCase));
+				if (vOut != IntPtr.Zero && input != null)
+				{
+					throw (new ArgumentException(@"Both In Out Params Illegal"));
+				}
+				else if (vOut != IntPtr.Zero)
+				{
+					// From http://dotneteers.net/blogs/divedeeper/archive/2008/07/14/LearnVSXNowPart25.aspx
+					// --- The IDE is requesting the current value for the combo
+					Marshal.GetNativeVariantForObject(per.Current.Name, vOut);
+				}
+				else if (input != null)
+				{
+					var perspectiveName = input.ToString();
 
-                    if (per != null)
-                    {
-                        per.Apply();
-                    }
-                }
+					per = per.GetPerspectives().FirstOrDefault(m => m.Name.Equals(perspectiveName, StringComparison.OrdinalIgnoreCase));
+
+					if (per != null)
+					{
+						per.Apply();
+					}
+				}
             }
         }
 
